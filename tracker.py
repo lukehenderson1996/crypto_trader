@@ -296,7 +296,7 @@ while True:
                             else:
                                 wrongCRCcount = wrongCRCcount + 1
                                 if wrongCRCcount%50==0:
-                                    print(bcolors.WARNING + '\tIncorrect CRC count=' + str(wrongCRCcount) + bcolors.ENDC)
+                                    pass#print(bcolors.WARNING + '\tIncorrect CRC count=' + str(wrongCRCcount) + bcolors.ENDC)
                         # print(bcolors.FAIL + 'Error: Incorrect CRC, data below' + bcolors.ENDC)
                         # print(recData)
                         # print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
