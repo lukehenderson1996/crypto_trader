@@ -54,9 +54,12 @@ closeKrakenTHD = False
 
 
 def kws_thread(kws):
-    while not closeKrakenWS:
+    while True:
         try:
-            payload = kws.recv()
+            if time.time()-startTime>3:
+                pass
+            else:
+                payload = kws.recv()
         except websocket._exceptions.WebSocketConnectionClosedException:
             traceback.print_exc()
             print(bcolors.FAIL + 'Error: WS closed' + bcolors.ENDC)
@@ -73,11 +76,24 @@ def kws_thread(kws):
             print(bcolors.FAIL + 'Error: Unknown WS exception' + bcolors.ENDC)
             exit()
         recTime = time.time()
-        print("Kraken thread: %s" % time.time())
-        # raise KeyboardInterrupt
+        # print("Kraken thread: %s" % time.time())
+        #print what event is
+        # recData = json.loads(payload)
+        # if type(recData) is dict:
+        #     if recData['event']=='heartbeat':
+        #         pass
+        #     elif recData['event']=='error':
+        #         print(bcolors.FAIL + 'In-message error, data below' + bcolors.ENDC)
+        #         print(recData)
+        #         print(type(recData))
+        #     elif recData['event']=='systemStatus':
+        #         print(bcolors.OKBLUE + recData['event'] + bcolors.ENDC + ' Status: ' + recData['status'] + ', Version: ' + recData['version'] + ', ID:' + str(recData['connectionID']))
+        #     elif recData['event']=='subscriptionStatus':
+        #         print(bcolors.OKBLUE + recData['event'] + bcolors.ENDC + ' Status: ' + recData['status'] + ', channelName: ' + recData['channelName'] + ', pair:' + recData['pair'])
         if closeKrakenWS:
             kws.close()
             print(bcolors.WARNING + 'closing' + bcolors.ENDC)
+            break
 
 
 
@@ -98,10 +114,25 @@ while True:
     if krThd.is_alive():
         print('alive')
     else:
-        print(bcolors.FAIL + 'Error: Kraken thread not alive' + bcolors.ENDC)
-        exit()
-    if time.time()-startTime>5:
+        #you can't restart it here
+        print(bcolors.WARNING + 'Restarting kraken thread' + bcolors.ENDC)
         kws.close()
+        kws = create_connection("wss://ws.kraken.com/")
+        kws.send('{"event":"subscribe", "subscription":{"name":"trade"}, "pair":["XBT/USD","XRP/USD"]}')
+        # krThd = threading.Thread(target=kws_thread,args=(kws,))
+        myThreads = threading.enumerate()
+        print(myThreads)
+        # krThd.daemon = True
+        myThreads = threading.enumerate()
+        print(myThreads)
+        krThd.start()
+    if time.time()-startTime>10:
+        # kws.close()
+        #example code to be incorporated within the thread somehow, but how long does recv() take to timeout?
+        print(bcolors.OKGREEN + ' closing with no internet')
+        kws.close()
+        kws = create_connection("wss://ws.kraken.com/") #if no internet, will do this: websocket._exceptions.WebSocketAddressException
+        print('done' + bcolors.ENDC)
         # closeKrakenWS = True
     #if it really won't listen (internet is down)
         # sock.shutdown(socket.SHUT_RDWR)
