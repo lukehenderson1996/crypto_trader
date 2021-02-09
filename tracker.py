@@ -130,7 +130,7 @@ while True:
                     print(recData)
                 newSnapshot = False
                 ws.send('{"event":"subscribe", "subscription":{"depth":10,"name":"book"}, "pair":["XBT/USD"]}')
-                print(bcolors.WARNING + 'resubscribed - ' + strftime("%Y-%m-%d %H:%M:%S", localtime()) + bcolors.ENDC)
+                #print(bcolors.WARNING + 'resubscribed - ' + strftime("%Y-%m-%d %H:%M:%S", localtime()) + bcolors.ENDC)
         else:
             print(bcolors.FAIL + 'Error: Unknown event, data below' + bcolors.ENDC)
             print(recData)
@@ -159,7 +159,7 @@ while True:
                 if 'c' in recDict:
                     recCRC = int(recDict['c'])
                 else:
-                    print(bcolors.WARNING + 'CRC not in book update' + bcolors.ENDC)
+                    #print(bcolors.WARNING + 'CRC not in book update' + bcolors.ENDC)
                     recCRC = -1
                 if 'a' in recDict:
                     #update asks in local copy
@@ -281,18 +281,18 @@ while True:
                         #correct CRC:
                         #file handling
                         if wrongCRCcount:
-                            print(bcolors.OKGREEN + 'Correct CRC after ' + str(wrongCRCcount) + 'updates' + bcolors.ENDC)
+                            #print(bcolors.OKGREEN + 'Correct CRC after ' + str(wrongCRCcount) + 'updates' + bcolors.ENDC)
                             wrongCRCcount = 0
                         logOrderBook(fetchTime, iterTime, btcBook)
                     else:
                         #incorrect CRC
                         if newSnapshot == False: #(if the plan is not to resubscribe)
-                            if wrongCRCcount >= 1000:
+                            if wrongCRCcount >= 8:
                                 #need to resubscribe
                                 newSnapshot = True
                                 wrongCRCcount = 0
                                 ws.send('{"event":"unsubscribe", "subscription":{"depth":10,"name":"book"}, "pair":["XBT/USD"]}')
-                                print(bcolors.WARNING + 'Incorrect CRC, unsubscribed' + bcolors.ENDC)
+                                print(bcolors.WARNING + 'Incorrect CRC, resubscribing' + strftime("%Y-%m-%d %H:%M:%S", localtime()) + bcolors.ENDC)
                             else:
                                 wrongCRCcount = wrongCRCcount + 1
                                 if wrongCRCcount%50==0:

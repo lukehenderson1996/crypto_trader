@@ -18,4 +18,4 @@ V0.1: Prices are Kraken BTC/USD only, all times/dates are program iteration run 
 
 V0.2: #B or#A is the top three bids/asks and the volume is right next to it (#V)
 
-V0.3: these are the nearest bids or asks whose volume exceeds 0.03BTC (about $1100). A future version will take a weighted average of the lower volume bids/asks to truly calculate where the nearest X dollars is but this was easier to program for now. The 0.42% reference point is just a line that sits one maker+taker fee above the given ask based on the entry level of the kraken fee schedule
+V0.3: these are the nearest bids or asks whose volume exceeds 0.03BTC (about $1100). A future version will take a weighted average of the lower volume bids/asks to truly calculate where the nearest X dollars are but this was easier to program for now. The 0.42% reference point is just a line that sits one maker+taker fee above the given ask based on the entry level of the kraken fee schedule
