@@ -102,7 +102,24 @@ while True:
             f.write(CSV_HEADER)
             f.close()
     #start websocket handling
-    payload = ws.recv()
+    # payload = ws.recv()
+    try:
+        payload = ws.recv()
+    except websocket._exceptions.WebSocketConnectionClosedException:
+        traceback.print_exc()
+        print(bcolors.FAIL + 'Error: WS closed' + bcolors.ENDC)
+        exit()
+    except TimeoutError:
+        traceback.print_exc()
+        print(bcolors.FAIL + 'Error: Timeout' + bcolors.ENDC)
+        exit()
+    except KeyboardInterrupt:
+        traceback.print_exc()
+        exit()
+    except:
+        traceback.print_exc()
+        print(bcolors.FAIL + 'Error: Unknown WS exception' + bcolors.ENDC)
+        exit()
     recData = json.loads(payload)
     if type(recData) is dict:
         if not "event" in recData:

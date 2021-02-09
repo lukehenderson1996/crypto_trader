@@ -1,4 +1,6 @@
 cd /home/luke/Documents/crypto_trader/
+clear
+python3 tracker.py
 
 python3 debuggerAsync.py  | tee -a /home/luke/Documents/crypto_trader/log/out.txt
 

@@ -22,6 +22,8 @@ import threading
 # import signal #only so ctrl_c will go to main thread
 #crc calculation
 import zlib
+#error handling
+import traceback
 
 #make text look unique
 class bcolors:
@@ -53,7 +55,23 @@ closeKrakenTHD = False
 
 def kws_thread(kws):
     while not closeKrakenWS:
-        payload = kws.recv()
+        try:
+            payload = kws.recv()
+        except websocket._exceptions.WebSocketConnectionClosedException:
+            traceback.print_exc()
+            print(bcolors.FAIL + 'Error: WS closed' + bcolors.ENDC)
+            exit()
+        except TimeoutError:
+            traceback.print_exc()
+            print(bcolors.FAIL + 'Error: Timeout' + bcolors.ENDC)
+            exit()
+        except KeyboardInterrupt:
+            traceback.print_exc()
+            exit()
+        except:
+            traceback.print_exc()
+            print(bcolors.FAIL + 'Error: Unknown WS exception' + bcolors.ENDC)
+            exit()
         recTime = time.time()
         print("Kraken thread: %s" % time.time())
         # raise KeyboardInterrupt
@@ -82,8 +100,9 @@ while True:
     else:
         print(bcolors.FAIL + 'Error: Kraken thread not alive' + bcolors.ENDC)
         exit()
-    if time.time()-startTime>10:
-        closeKrakenWS = True
+    if time.time()-startTime>5:
+        kws.close()
+        # closeKrakenWS = True
     #if it really won't listen (internet is down)
         # sock.shutdown(socket.SHUT_RDWR)
 
