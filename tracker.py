@@ -21,6 +21,8 @@ import websocket
 import _thread
 #crc calculation
 import zlib
+#error handling
+import traceback
 
 #make text look unique
 class bcolors:
