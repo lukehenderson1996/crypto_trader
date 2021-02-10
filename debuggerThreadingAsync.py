@@ -129,6 +129,7 @@ while True:
     if time.time()-startTime>10:
         # kws.close()
         #example code to be incorporated within the thread somehow, but how long does recv() take to timeout?
+        #https://stackoverflow.com/questions/2719017/how-to-set-timeout-on-pythons-socket-recv-method
         print(bcolors.OKGREEN + ' closing with no internet')
         kws.close()
         kws = create_connection("wss://ws.kraken.com/") #if no internet, will do this: websocket._exceptions.WebSocketAddressException

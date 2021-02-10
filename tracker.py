@@ -49,10 +49,7 @@ btcCRC = 0
 
 
 def logOrderBook(fetchTime, iterTime, btcBook): #btcBook is a dictionary of the top ten bids/asks
-    if not os.path.exists('datedCSV/' + strftime("%Y-%m-%d", fetchTime)):
-        os.mkdir('datedCSV/' + strftime("%Y-%m-%d", fetchTime))
-    f = open('datedCSV/' + strftime("%Y-%m-%d", fetchTime) + '/BTC_' + strftime("%H", fetchTime) + '.csv', "a+")
-    f.write(strftime("%Y-%m-%d %H:%M:%S", fetchTime) + " , " + str(iterTime) + " , ")
+
     #find nearest $0.03BTC (about $1100 in feb 2021)
     for askInd in range(10):
         total = 0
@@ -60,26 +57,32 @@ def logOrderBook(fetchTime, iterTime, btcBook): #btcBook is a dictionary of the 
             total = total + float(btcBook['as'][i][1])
         if total >= 0.03:
             break
+        total = None
     for bidInd in range(10):
         total = 0
         for i in range(bidInd+1):
             total = total + float(btcBook['bs'][i][1])
         if total >= 0.03:
             break
-    if askInd >= 9 or bidInd >= 9:
+        total = None
+    if askInd is None or bidInd is None:
         print(bcolors.FAIL + 'Error: Ask or bid volume not found' + bcolors.ENDC)
         print('askInd: ' + str(askInd) + ' bidInd: ' + str(bidInd))
         print(recData)
         print(type(recData))
         print(btcBook)
-        raise ValueError('Ask or bid volume not found')
-    #generate additional columns
-    feeRef = float(btcBook['as'][askInd][0])*100.42/100
-    #log values
-        # f.write(btcBook['as'][2][0] + " , " + btcBook['as'][2][1] + " , " + btcBook['as'][1][0] + " , " + btcBook['as'][1][1] + " , " + btcBook['as'][0][0] + " , " + btcBook['as'][0][1] + " , ")
-        # f.write(btcBook['bs'][0][0] + " , " + btcBook['bs'][0][1] + " , " + btcBook['bs'][1][0] + " , " + btcBook['bs'][1][1] + " , " + btcBook['bs'][2][0] + " , " + btcBook['bs'][2][1] + "\r\n")
-    f.write(btcBook['as'][askInd][0] + " , " + btcBook['bs'][bidInd][0] + " , " + str(feeRef) + "\r\n")
-    f.close()
+        print(bcolors.FAIL + 'End of Ask or bid volume not found' + bcolors.ENDC)
+        # raise ValueError('Ask or bid volume not found')
+    else:
+        #generate additional columns
+        feeRef = float(btcBook['as'][askInd][0])*100.42/100
+        #log values
+        if not os.path.exists('datedCSV/' + strftime("%Y-%m-%d", fetchTime)):
+            os.mkdir('datedCSV/' + strftime("%Y-%m-%d", fetchTime))
+        f = open('datedCSV/' + strftime("%Y-%m-%d", fetchTime) + '/BTC_' + strftime("%H", fetchTime) + '.csv', "a+")
+        f.write(strftime("%Y-%m-%d %H:%M:%S", fetchTime) + " , " + str(iterTime) + " , ")
+        f.write(btcBook['as'][askInd][0] + " , " + btcBook['bs'][bidInd][0] + " , " + str(feeRef) + "\r\n")
+        f.close()
 
 #Main code:-------------------------------------------------------------------------------------------------------------------------------
 # Connect to WebSocket API and subscribe to trade feed for XBT/USD and XRP/USD
@@ -105,23 +108,37 @@ while True:
             f.close()
     #start websocket handling
     # payload = ws.recv()
-    try:
-        payload = ws.recv()
-    except websocket._exceptions.WebSocketConnectionClosedException:
-        traceback.print_exc()
-        print(bcolors.FAIL + 'Error: WS closed' + bcolors.ENDC)
-        exit()
-    except TimeoutError:
-        traceback.print_exc()
-        print(bcolors.FAIL + 'Error: Timeout' + bcolors.ENDC)
-        exit()
-    except KeyboardInterrupt:
-        traceback.print_exc()
-        exit()
-    except:
-        traceback.print_exc()
-        print(bcolors.FAIL + 'Error: Unknown WS exception' + bcolors.ENDC)
-        exit()
+    reconnectFlag = False
+    while True:
+        try:
+            if reconnectFlag:
+                sleep(15)
+                print(bcolors.WARNING + 'Reconnecting...' + bcolors.ENDC)
+                ws.close
+                ws = create_connection("wss://ws.kraken.com/")
+                ws.send('{"event":"subscribe", "subscription":{"depth":10,"name":"book"}, "pair":["XBT/USD"]}')
+                print(bcolors.WARNING + 'Done' + bcolors.ENDC)
+            payload = ws.recv()
+            break
+        except websocket._exceptions.WebSocketConnectionClosedException:
+            traceback.print_exc()
+            print(bcolors.FAIL + 'Error: WS closed' + bcolors.ENDC)
+            exit()
+        except TimeoutError:
+            # traceback.print_exc()
+            print(bcolors.FAIL + 'Error: Timeout' + bcolors.ENDC)
+            reconnectFlag = True
+            # exit()
+        except websocket._exceptions.WebSocketAddressException:
+            print(bcolors.FAIL + 'Error: WS Address Exception (usually means no internet)' + bcolors.ENDC)
+            reconnectFlag = True
+        except KeyboardInterrupt:
+            traceback.print_exc()
+            exit()
+        except:
+            traceback.print_exc()
+            print(bcolors.FAIL + 'Error: Unknown WS exception' + bcolors.ENDC)
+            exit()
     recData = json.loads(payload)
     if type(recData) is dict:
         if not "event" in recData:
@@ -140,11 +157,12 @@ while True:
             print(bcolors.OKBLUE + recData['event'] + bcolors.ENDC + ' Status: ' + recData['status'] + ', Version: ' + recData['version'] + ', ID:' + str(recData['connectionID']))
         elif recData['event']=='subscriptionStatus':
             if newSnapshot == False:
-                print(bcolors.OKBLUE + recData['event'] + bcolors.ENDC + ' Status: ' + recData['status'] + ', channelName: ' + recData['channelName'] + ', pair:' + recData['pair'])
+                #print(bcolors.OKBLUE + recData['event'] + bcolors.ENDC + ' Status: ' + recData['status'] + ', channelName: ' + recData['channelName'] + ', pair:' + recData['pair'])
                 btcCH = recData['channelID']
             else:
                 if 'event' in recData and 'status' in recData and 'channelName' in recData and 'pair' in recData:
-                    print(bcolors.OKBLUE + recData['event'] + bcolors.ENDC + ' Status: ' + recData['status'] + ', channelName: ' + recData['channelName'] + ', pair:' + recData['pair'])
+                    pass
+                    # print(bcolors.OKBLUE + recData['event'] + bcolors.ENDC + ' Status: ' + recData['status'] + ', channelName: ' + recData['channelName'] + ', pair:' + recData['pair'])
                 else:
                     print(recData)
                 newSnapshot = False
@@ -311,7 +329,7 @@ while True:
                                 newSnapshot = True
                                 wrongCRCcount = 0
                                 ws.send('{"event":"unsubscribe", "subscription":{"depth":10,"name":"book"}, "pair":["XBT/USD"]}')
-                                print(bcolors.WARNING + 'Incorrect CRC, resubscribing' + strftime("%Y-%m-%d %H:%M:%S", localtime()) + bcolors.ENDC)
+                                # print(bcolors.WARNING + 'Incorrect CRC, resubscribing' + strftime("%Y-%m-%d %H:%M:%S", localtime()) + bcolors.ENDC)
                             else:
                                 wrongCRCcount = wrongCRCcount + 1
                                 if wrongCRCcount%50==0:
