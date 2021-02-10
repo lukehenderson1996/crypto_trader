@@ -78,7 +78,7 @@ def logOrderBook(fetchTime, iterTime, btcBook): #btcBook is a dictionary of the 
     #log values
         # f.write(btcBook['as'][2][0] + " , " + btcBook['as'][2][1] + " , " + btcBook['as'][1][0] + " , " + btcBook['as'][1][1] + " , " + btcBook['as'][0][0] + " , " + btcBook['as'][0][1] + " , ")
         # f.write(btcBook['bs'][0][0] + " , " + btcBook['bs'][0][1] + " , " + btcBook['bs'][1][0] + " , " + btcBook['bs'][1][1] + " , " + btcBook['bs'][2][0] + " , " + btcBook['bs'][2][1] + "\r\n")
-    f.write(btcBook['as'][askInd][0] + " , " + btcBook['bs'][bidInd][0] + str(feeRef) + "\r\n")
+    f.write(btcBook['as'][askInd][0] + " , " + btcBook['bs'][bidInd][0] + " , " + str(feeRef) + "\r\n")
     f.close()
 
 #Main code:-------------------------------------------------------------------------------------------------------------------------------
