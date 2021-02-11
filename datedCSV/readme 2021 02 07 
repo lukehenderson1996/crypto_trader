@@ -3,10 +3,10 @@ YYYY-MM-DD/BTC_HH is data organized by hour
 _YYYY-MM/BTC_A_DD.csv is data organized by day
 
 
-V0.1: 2021-02-03 - - - - - - - 	Date,Time,Best Ask,baVol,Best Bid,bbVol		
-V0.2: 2021-02-04 to 2021-02-06	Date,Time,3A,3V,2A,2V,1A,1V,1B,1V,2B,2V,3B,3V
-V0.3: 2021-02-07 to present	Date,Time,KrAsk,KrBid,0.42% Ref
-
+V0.1: 2021-02-03 - - - - - - - 		Date,Time,Best Ask,baVol,Best Bid,bbVol		
+V0.2: 2021-02-04 to 2021-02-06		Date,Time,3A,3V,2A,2V,1A,1V,1B,1V,2B,2V,3B,3V
+V0.3: 2021-02-07 to 11th 2pm		Date,Time,KrAsk,KrBid,0.42% Ref
+V0.4: 2021-02-11 2pm to present		_KR: Date,Time,KrAsk,KrBid,0.42% Ref	_BN: Date,Time,BnAsk,BnBid,0.42% Ref
 
 
 
@@ -19,3 +19,5 @@ V0.1: Prices are Kraken BTC/USD only, all times/dates are program iteration run 
 V0.2: #B or#A is the top three bids/asks and the volume is right next to it (#V)
 
 V0.3: these are the nearest bids or asks whose volume exceeds 0.03BTC (about $1100). A future version will take a weighted average of the lower volume bids/asks to truly calculate where the nearest X dollars are but this was easier to program for now. The 0.42% reference point is just a line that sits one maker+taker fee above the given ask based on the entry level of the kraken fee schedule
+
+V0.4: same data and collection (but with bugfix, previous version may have had innacurate timestamps right before gaps in data) now broken down into BTC_BN and BTC_KR for binance and kraken
