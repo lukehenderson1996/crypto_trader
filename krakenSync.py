@@ -121,7 +121,7 @@ while True:
             payload = ws.recv()
             break
         except websocket._exceptions.WebSocketConnectionClosedException:
-            traceback.print_exc()
+            # traceback.print_exc()
             print(bcolors.FAIL + 'Error: WS closed' + bcolors.ENDC)
             reconnectFlag = True
             # exit()
