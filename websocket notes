@@ -382,7 +382,7 @@ Error: Level index not found, data below
 long term debugging examples:
 
 
---------------------------------------------------------------------------------SOLVED: example 1, missed packet crc. assumed to be caused by comparing the last crc with the latest data
+--------------------------------------------------------------------------------SOLVED example 1, missed packet crc. assumed to be caused by comparing the last crc with the latest data
 
 Correct CRC
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -489,7 +489,7 @@ ValueError: Incorrect CRC
 
 
 
---------------------------------------------------------------------------------example 2, connection timed out
+--------------------------------------------------------------------------------SOLVED example 2, connection timed out
 
 
 
