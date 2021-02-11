@@ -39,7 +39,8 @@ class bcolors:
 CSV_HEADER = "Date,Time,KrAsk,KrBid,0.42% Ref\r\n"
 
 progStart = time.time()
-# lastFinexFetch = time.time()
+fetchTime = localtime(0)
+iterTime = 0
 
 
 btcBook = {"as": [[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ] ],"bs": [[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ],[ "blank", "blank", "blank" ] ]}
@@ -79,7 +80,7 @@ def logOrderBook(fetchTime, iterTime, btcBook): #btcBook is a dictionary of the 
         #log values
         if not os.path.exists('datedCSV/' + strftime("%Y-%m-%d", fetchTime)):
             os.mkdir('datedCSV/' + strftime("%Y-%m-%d", fetchTime))
-        f = open('datedCSV/' + strftime("%Y-%m-%d", fetchTime) + '/BTC_' + strftime("%H", fetchTime) + '.csv', "a+")
+        f = open('datedCSV/' + strftime("%Y-%m-%d", fetchTime) + '/BTC_KR_' + strftime("%H", fetchTime) + '.csv', "a+")
         f.write(strftime("%Y-%m-%d %H:%M:%S", fetchTime) + " , " + str(iterTime) + " , ")
         f.write(btcBook['as'][askInd][0] + " , " + btcBook['bs'][bidInd][0] + " , " + str(feeRef) + "\r\n")
         f.close()
@@ -95,19 +96,7 @@ wrongCRCcount = 0
 
 # Infinite loop waiting for WebSocket data
 while True:
-    #start logging
-    fetchTime = localtime()
-    iterTime = time.time()
-    if True: #int(strftime("%M", fetchTime)) % 10 == 0: #minute is a multiple of 10
-        #create folder and header
-        if not os.path.exists('datedCSV/' + strftime("%Y-%m-%d", fetchTime)):
-            os.mkdir('datedCSV/' + strftime("%Y-%m-%d", fetchTime))
-        if not os.path.exists('datedCSV/' + strftime("%Y-%m-%d", fetchTime) + '/BTC_' + strftime("%H", fetchTime) + '.csv'): #file does not yet exist
-            f = open('datedCSV/' + strftime("%Y-%m-%d", fetchTime) + '/BTC_' + strftime("%H", fetchTime) + '.csv', "a+")
-            f.write(CSV_HEADER)
-            f.close()
     #start websocket handling
-    # payload = ws.recv()
     reconnectFlag = False
     while True:
         try:
@@ -141,6 +130,20 @@ while True:
             print(bcolors.FAIL + 'Error: Unknown WS exception' + bcolors.ENDC)
             exit()
     recData = json.loads(payload)
+
+    #start logging
+    fetchTime = localtime()
+    iterTime = time.time()
+    if True: #int(strftime("%M", fetchTime)) % 10 == 0: #minute is a multiple of 10
+        #create folder and header
+        if not os.path.exists('datedCSV/' + strftime("%Y-%m-%d", fetchTime)):
+            os.mkdir('datedCSV/' + strftime("%Y-%m-%d", fetchTime))
+        if not os.path.exists('datedCSV/' + strftime("%Y-%m-%d", fetchTime) + '/BTC_KR_' + strftime("%H", fetchTime) + '.csv'): #file does not yet exist
+            f = open('datedCSV/' + strftime("%Y-%m-%d", fetchTime) + '/BTC_KR_' + strftime("%H", fetchTime) + '.csv', "a+")
+            f.write(CSV_HEADER)
+            f.close()
+
+    #analyze received data
     if type(recData) is dict:
         if not "event" in recData:
             print(bcolors.FAIL + 'Key error, data below' + bcolors.ENDC)
@@ -165,7 +168,10 @@ while True:
                     pass
                     # print(bcolors.OKBLUE + recData['event'] + bcolors.ENDC + ' Status: ' + recData['status'] + ', channelName: ' + recData['channelName'] + ', pair:' + recData['pair'])
                 else:
+                    print(bcolors.FAIL + 'Error: New snapshot request resulted in unknown response, data below' + bcolors.ENDC)
                     print(recData)
+                    print(type(recData))
+                    raise ValueError('New snapshot request resulted in unknown response')
                 newSnapshot = False
                 ws.send('{"event":"subscribe", "subscription":{"depth":10,"name":"book"}, "pair":["XBT/USD"]}')
                 #print(bcolors.WARNING + 'resubscribed - ' + strftime("%Y-%m-%d %H:%M:%S", localtime()) + bcolors.ENDC)

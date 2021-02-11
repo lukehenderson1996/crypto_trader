@@ -34,5 +34,8 @@ class bcolors:
 
 
 print('start')
-for j in range(1,9): #only goes up to 8
-    print(j)
+fetchTime = localtime()
+iterTime = time.time()
+
+print(localtime(0))
+print(time.time())
