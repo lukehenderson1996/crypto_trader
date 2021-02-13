@@ -54,6 +54,7 @@ closeKrakenTHD = False
 
 
 def kws_thread(kws):
+    raise KeyboardInterrupt
     while True:
         try:
             if time.time()-startTime>3:
@@ -114,7 +115,7 @@ while True:
     if krThd.is_alive():
         print('alive')
     else:
-        #you can't restart it here
+        #you can't restart it here, this is a bug get rid of this
         print(bcolors.WARNING + 'Restarting kraken thread' + bcolors.ENDC)
         kws.close()
         kws = create_connection("wss://ws.kraken.com/")
