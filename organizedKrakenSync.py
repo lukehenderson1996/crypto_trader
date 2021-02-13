@@ -168,12 +168,12 @@ while True:
             print(bcolors.OKBLUE + recData['event'] + bcolors.ENDC + ' Status: ' + recData['status'] + ', Version: ' + recData['version'] + ', ID:' + str(recData['connectionID']))
         elif recData['event']=='subscriptionStatus':
             if newSnapshot == False:
-                print(bcolors.OKBLUE + recData['event'] + bcolors.ENDC + ' Status: ' + recData['status'] + ', channelName: ' + recData['channelName'] + ', pair:' + recData['pair'])
+                # print(bcolors.OKBLUE + recData['event'] + bcolors.ENDC + ' Status: ' + recData['status'] + ', channelName: ' + recData['channelName'] + ', pair:' + recData['pair'])
                 btcCH = recData['channelID']
             else:
                 if 'event' in recData and 'status' in recData and 'channelName' in recData and 'pair' in recData:
                     pass
-                    print(bcolors.OKBLUE + recData['event'] + bcolors.ENDC + ' Status: ' + recData['status'] + ', channelName: ' + recData['channelName'] + ', pair:' + recData['pair'])
+                    # print(bcolors.OKBLUE + recData['event'] + bcolors.ENDC + ' Status: ' + recData['status'] + ', channelName: ' + recData['channelName'] + ', pair:' + recData['pair'])
                 else:
                     print(bcolors.FAIL + 'Error: New snapshot request resulted in unknown response, data below' + bcolors.ENDC)
                     print(recData)
@@ -181,7 +181,7 @@ while True:
                     raise ValueError('New snapshot request resulted in unknown response')
                 newSnapshot = False
                 kws.send('{"event":"subscribe", "subscription":{"depth":10,"name":"book"}, "pair":["XBT/USD"]}')
-                print(bcolors.WARNING + 'resubscribed - ' + strftime("%Y-%m-%d %H:%M:%S", localtime()) + bcolors.ENDC)
+                # print(bcolors.WARNING + 'resubscribed - ' + strftime("%Y-%m-%d %H:%M:%S", localtime()) + bcolors.ENDC)
         else:
             print(bcolors.FAIL + 'Error: Unknown event, data below' + bcolors.ENDC)
             print(recData)
