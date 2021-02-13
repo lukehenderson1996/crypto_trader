@@ -758,3 +758,49 @@ Traceback (most recent call last):
     raise ValueError('Ask or bid volume not found')
 ValueError: Ask or bid volume not found
 luke@XPS420:~/Documents/crypto_trader$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------example 5: json decode bug (halway done debugging)
+
+
+
+
+luke@XPS420:~/Documents/crypto_trader$ python3 krakenSync.py 
+systemStatus Status: online, Version: 1.7.2, ID:10804062935692590588
+Traceback (most recent call last):
+  File "krakenSync.py", line 132, in <module>
+    recData = json.loads(payload)
+  File "/usr/lib/python3.5/json/__init__.py", line 319, in loads
+    return _default_decoder.decode(s)
+  File "/usr/lib/python3.5/json/decoder.py", line 339, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/usr/lib/python3.5/json/decoder.py", line 357, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+luke@XPS420:~/Documents/crypto_trader$ 

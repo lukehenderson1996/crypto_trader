@@ -129,7 +129,21 @@ while True:
             traceback.print_exc()
             print(bcolors.FAIL + 'Error: Unknown WS exception' + bcolors.ENDC)
             exit()
-    recData = json.loads(payload)
+    #load data (had recent bug)
+    try:
+        recData = json.loads(payload)
+    except KeyboardInterrupt:
+        traceback.print_exc()
+        exit()
+    except:
+        print(bcolors.FAIL + 'Error: Unknown WS exception' + bcolors.ENDC)
+        print(bcolors.OKBLUE + 'payload:' + bcolors.ENDC)
+        print(payload)
+        print(bcolors.OKBLUE + 'type:' + bcolors.ENDC)
+        print(type(payload))
+        print(bcolors.OKBLUE + 'traceback:' + bcolors.ENDC)
+        traceback.print_exc()
+        exit()
 
     #start logging
     fetchTime = localtime()
