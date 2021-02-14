@@ -45,7 +45,42 @@ fetchTime = localtime(0)
 iterTime = 0
 
 
-
+def wsGetPayload(ws, recAddr, recSubInfo): #wsGetPayload(kws, "wss://ws.kraken.com/", '{"event":"subscribe", "subscription":{"depth":10,"name":"book"}, "pair":["XBT/USD"]}')
+    reconnectFlag = False
+    while True:
+        try:
+            if reconnectFlag: #something is wrong, start connection from scratch
+                sleep(15)
+                print(bcolors.WARNING + 'Reconnecting...' + bcolors.ENDC)
+                ws.close
+                ws = create_connection(recAddr) #"wss://ws.kraken.com/"
+                ws.send(recSubInfo) #'{"event":"subscribe", "subscription":{"depth":10,"name":"book"}, "pair":["XBT/USD"]}'
+                print(bcolors.WARNING + 'Done' + bcolors.ENDC)
+            return ws.recv(), ws
+            # break
+        except websocket._exceptions.WebSocketConnectionClosedException:
+            # traceback.print_exc()
+            print(bcolors.FAIL + 'Error: WS closed' + bcolors.ENDC)
+            reconnectFlag = True
+            # exit()
+        except websocket._exceptions.WebSocketProtocolException:
+            print(bcolors.FAIL + 'Error: protocol exception' + bcolors.ENDC)
+            reconnectFlag = True
+        except TimeoutError:
+            # traceback.print_exc()
+            print(bcolors.FAIL + 'Error: Timeout' + bcolors.ENDC)
+            reconnectFlag = True
+            # exit()
+        except websocket._exceptions.WebSocketAddressException:
+            print(bcolors.FAIL + 'Error: WS Address Exception (usually means no internet)' + bcolors.ENDC)
+            reconnectFlag = True
+        except KeyboardInterrupt:
+            traceback.print_exc()
+            exit()
+        except:
+            traceback.print_exc()
+            print(bcolors.FAIL + 'Error: Unknown WS exception' + bcolors.ENDC)
+            exit()
 
 def logOrderBook(fetchTime, iterTime, btcBook): #btcBook is a dictionary of the top ten bids/asks
 
@@ -89,15 +124,32 @@ def logOrderBook(fetchTime, iterTime, btcBook): #btcBook is a dictionary of the 
 
 #Main code:-------------------------------------------------------------------------------------------------------------------------------
 # Connect to WebSocket API and subscribe to trade feed
-ws = create_connection("wss://stream.binance.com:9443/ws/btcusdt@depth10@1000ms")
-ws.send('{"method": "SUBSCRIBE","params":["btcusdt@depth10@100ms"],"id": 1}')
-# ws.send('{"method": "SUBSCRIBE","params":["btcusdt@aggTrade","btcusdt@depth"],"id": 1}')
+bws = create_connection("wss://stream.binance.com:9443/ws/btcusdt@depth10@1000ms")
+bws.send('{"method": "SUBSCRIBE","params":["btcusdt@depth10@100ms"],"id": 1}')
+# bws.send('{"method": "SUBSCRIBE","params":["btcusdt@aggTrade","btcusdt@depth"],"id": 1}')
 
 while True:
     #start websocket handling
-    payload = ws.recv()
-    recData = json.loads(payload)
-    
+    # payload = bws.recv()
+    # recData = json.loads(payload)
+    payload, bws = wsGetPayload(bws, "wss://stream.binance.com:9443/ws/btcusdt@depth10@1000ms", '{"method": "SUBSCRIBE","params":["btcusdt@depth10@100ms"],"id": 1}')
+    # print(bcolors.OKGREEN + 'succesful call of get payload' + bcolors.ENDC)
+    #load data (had recent bug)
+    try:
+        recData = json.loads(payload)
+    except KeyboardInterrupt:
+        traceback.print_exc()
+        exit()
+    except:
+        print(bcolors.FAIL + 'Error: Unknown json loads exception' + bcolors.ENDC)
+        print(bcolors.OKBLUE + 'payload:' + bcolors.ENDC)
+        print(payload)
+        print(bcolors.OKBLUE + 'type:' + bcolors.ENDC)
+        print(type(payload))
+        print(bcolors.OKBLUE + 'traceback:' + bcolors.ENDC)
+        traceback.print_exc()
+        exit()
+
     #start logging
     fetchTime = localtime()
     iterTime = time.time()

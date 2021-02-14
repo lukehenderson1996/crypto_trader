@@ -57,7 +57,7 @@ def wsGetPayload(ws, recAddr, recSubInfo): #wsGetPayload(kws, "wss://ws.kraken.c
                 ws = create_connection(recAddr) #"wss://ws.kraken.com/"
                 ws.send(recSubInfo) #'{"event":"subscribe", "subscription":{"depth":10,"name":"book"}, "pair":["XBT/USD"]}'
                 print(bcolors.WARNING + 'Done' + bcolors.ENDC)
-            return ws.recv()
+            return ws.recv(), ws
             # break
         except websocket._exceptions.WebSocketConnectionClosedException:
             # traceback.print_exc()
@@ -124,7 +124,8 @@ kws.send('{"event":"subscribe", "subscription":{"depth":10,"name":"book"}, "pair
 #infinite loop waiting for WebSocket data
 while True:
     #start websocket handling
-    payload = wsGetPayload(kws, "wss://ws.kraken.com/", '{"event":"subscribe", "subscription":{"depth":10,"name":"book"}, "pair":["XBT/USD"]}')
+    payload, kws = wsGetPayload(kws, "wss://ws.kraken.com/", '{"event":"subscribe", "subscription":{"depth":10,"name":"book"}, "pair":["XBT/USD"]}')
+    # print(bcolors.OKGREEN + 'succesful call of get payload' + bcolors.ENDC)
     #load data (had recent bug)
     try:
         recData = json.loads(payload)
@@ -132,7 +133,7 @@ while True:
         traceback.print_exc()
         exit()
     except:
-        print(bcolors.FAIL + 'Error: Unknown WS exception' + bcolors.ENDC)
+        print(bcolors.FAIL + 'Error: Unknown json loads exception' + bcolors.ENDC)
         print(bcolors.OKBLUE + 'payload:' + bcolors.ENDC)
         print(payload)
         print(bcolors.OKBLUE + 'type:' + bcolors.ENDC)
