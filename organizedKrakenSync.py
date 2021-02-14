@@ -64,6 +64,9 @@ def wsGetPayload(ws, recAddr, recSubInfo): #wsGetPayload(kws, "wss://ws.kraken.c
             print(bcolors.FAIL + 'Error: WS closed' + bcolors.ENDC)
             reconnectFlag = True
             # exit()
+        except websocket._exceptions.WebSocketProtocolException:
+            print(bcolors.FAIL + 'Error: protocol exception' + bcolors.ENDC)
+            reconnectFlag = True
         except TimeoutError:
             # traceback.print_exc()
             print(bcolors.FAIL + 'Error: Timeout' + bcolors.ENDC)
